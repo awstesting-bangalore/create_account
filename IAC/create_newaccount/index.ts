@@ -266,10 +266,10 @@ constructor(
                     return r.account.id;
                 }
 
-                return (
+                return pulumi.output(
                     r.accountPlan
                         .account_id ??
-                    ""
+                    "",
                 );
             },
         );
