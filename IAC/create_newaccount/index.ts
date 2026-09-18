@@ -1626,4 +1626,5 @@ private async runProgram(
 
         confirmedActionsTaken,
     };
+    }
 }

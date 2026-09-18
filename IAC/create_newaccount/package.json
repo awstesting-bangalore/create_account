@@ -2,11 +2,11 @@
     "name": "create-newacount",
     "version": "0.0.1",
     "main": "index.ts",
-    "devDependecies": {
+    "devDependencies": {
         "@types/node": "^18",
         "typescript": "^5.9.3"
     },
-    "devDependencies": {
+    "dependencies": {
         "@aws-sdk/client-iam": "^3.1045.0",
         "@aws-sdk/client-organizations": "^3.1045.0",
         "@aws-sdk/client-sts": "^3.1057.0",
