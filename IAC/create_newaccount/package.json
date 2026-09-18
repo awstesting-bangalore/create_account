@@ -2,7 +2,7 @@
     "name": "create-newacount",
     "version": "0.0.1",
     "main": "index.ts",
-    "devDependecies": {
+    "devDependencies": {
         "@types/node": "^18",
         "typescript": "^5.9.3"
     },
