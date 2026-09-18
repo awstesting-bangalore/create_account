@@ -152,7 +152,7 @@ confirmedActionsTaken?: pulumi.Output<string[]>;
 export class CreateNewAccount
 extends pulumi.ComponentResource {
 
-public readonly checkAliases!: pulumi.Output<string>;
+public readonly checkAliases!: pulumi.Output<boolean>;
 public readonly accountName!: pulumi.Output<string>;
 public readonly accountDl!: pulumi.Output<string>;
 public readonly accountAlias!: pulumi.Output<string>;
@@ -266,10 +266,10 @@ constructor(
                     return r.account.id;
                 }
 
-                return (
+                return pulumi.output(
                     r.accountPlan
                         .account_id ??
-                    ""
+                    "",
                 );
             },
         );
@@ -1626,4 +1626,5 @@ private async runProgram(
 
         confirmedActionsTaken,
     };
+}
 }
