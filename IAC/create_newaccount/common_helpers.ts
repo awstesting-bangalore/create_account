@@ -260,6 +260,12 @@ function toIamRoleArnFromCallerIdentity(identity: { Arn?: string | undefined; Ac
  * resulting clients + identity info. Must be called before any of the
  * getOrg-family/list_all_accounts/assume_role/build_indexes_* helpers below,
  * and before real_run's bootstrap_new_account_role_trust.
+ *
+ * Org-wide access is optional: when ORG_ASSUME_ROLE_ARN is not set (e.g. a
+ * single-account AWS Organization with nothing to check duplicates against
+ * yet), this logs a warning and returns without initializing the org
+ * clients. Callers must use orgAccessAvailable() to check before relying on
+ * getOrg()/getOrgSts()/getOrgAccountId().
  */
 export async function buildAwsClients(): Promise<void> {
     const callerIdentity = await loginSts.send(new GetCallerIdentityCommand({}));
@@ -267,12 +273,11 @@ export async function buildAwsClients(): Promise<void> {
     _pulumiIacRoleArn = toIamRoleArnFromCallerIdentity(callerIdentity);
 
     if (!ORG_ASSUME_ROLE_ARN) {
-        throw new Error(
-            "ORG_ASSUME_ROLE_ARN environment variable is not set. It must be the ARN of " +
-            "an AWS Organizations management-account role that this program's caller " +
-            "identity can assume; it is required for account listing, duplicate " +
-            "detection, and trust-policy bootstrap.",
+        console.log(
+            "[org-access] ORG_ASSUME_ROLE_ARN is not set; skipping org-wide account " +
+            "listing, duplicate detection, and trust-policy bootstrap for this run.",
         );
+        return;
     }
 
     const baseCreds = await loginSts.send(
@@ -298,6 +303,14 @@ export async function buildAwsClients(): Promise<void> {
     const orgIdentity = await _orgSts.send(new GetCallerIdentityCommand({}));
     _orgAccountId = orgIdentity.Account ?? undefined;
     console.log("[org-caller-identity]", JSON.stringify(orgIdentity));
+}
+
+// True once buildAwsClients() has successfully assumed ORG_ASSUME_ROLE_ARN.
+// Callers that can degrade gracefully (duplicate detection, trust bootstrap)
+// should check this instead of calling getOrg()/getOrgSts()/getOrgAccountId()
+// directly, which throw when org access was never configured.
+export function orgAccessAvailable(): boolean {
+    return Boolean(_org && _orgSts && _orgAccountId);
 }
 
 // Accessors used by both flows (real_run also needs orgSts/orgAccountId/
@@ -330,6 +343,14 @@ export function getPulumiIacRoleArn(): string {
 // Accounts listing and duplicate indexing
 // -----------------------------------------------------------------------------
 export async function list_all_accounts() {
+    if (!orgAccessAvailable()) {
+        console.log(
+            "[org-access] org access unavailable; list_all_accounts() returning an " +
+            "empty list.",
+        );
+        return [];
+    }
+
     const org = getOrg();
     const accounts: SimpleAccount[] = [];
     let next_token: string | undefined;
