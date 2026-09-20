@@ -161,6 +161,7 @@ public readonly actionsTaken!: pulumi.Output<string[]>;
 public readonly accountId!: pulumi.Output<string>;
 public readonly reason!: pulumi.Output<string>;
 public readonly duplicate!: pulumi.Output<string>;
+public readonly dryRun!: pulumi.Output<string>;
 
 
 constructor(
@@ -266,10 +267,10 @@ constructor(
                     return r.account.id;
                 }
 
-                return (
+                return pulumi.output(
                     r.accountPlan
                         .account_id ??
-                    ""
+                    "",
                 );
             },
         );
@@ -293,6 +294,13 @@ constructor(
                 "abort"
                     ? p.duplicate
                     : "",
+        );
+
+
+    this.dryRun =
+        accountPlan.apply(
+            (p) =>
+                p.dry_run,
         );
 
 
@@ -323,6 +331,9 @@ constructor(
 
         duplicate:
             this.duplicate,
+
+        dryRun:
+            this.dryRun,
     });
 }
 
@@ -1626,4 +1637,5 @@ private async runProgram(
 
         confirmedActionsTaken,
     };
+}
 }
