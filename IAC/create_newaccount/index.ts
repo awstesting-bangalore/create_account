@@ -161,6 +161,7 @@ public readonly actionsTaken!: pulumi.Output<string[]>;
 public readonly accountId!: pulumi.Output<string>;
 public readonly reason!: pulumi.Output<string>;
 public readonly duplicate!: pulumi.Output<string>;
+public readonly dryRun!: pulumi.Output<string>;
 
 
 constructor(
@@ -296,6 +297,13 @@ constructor(
         );
 
 
+    this.dryRun =
+        accountPlan.apply(
+            (p) =>
+                p.dry_run,
+        );
+
+
     this.registerOutputs({
         checkAliases:
             this.checkAliases,
@@ -323,6 +331,9 @@ constructor(
 
         duplicate:
             this.duplicate,
+
+        dryRun:
+            this.dryRun,
     });
 }
 
