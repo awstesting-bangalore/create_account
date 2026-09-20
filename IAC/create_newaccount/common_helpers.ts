@@ -27,8 +27,7 @@ declare const process: any;
 // Config
 // -----------------------------------------------------------------------------
 export const AWS_REGION = process.env.AWS_REGION ?? process.env.AWS_DEFAULT_REGION ?? "us-east-1";
-export const ORG_ASSUME_ROLE_ARN =
-    process.env.ORG_ASSUME_ROLE_ARN ?? "arn:aws:iam::533702098697:role/AE-AWS-IAC";
+export const ORG_ASSUME_ROLE_ARN = process.env.ORG_ASSUME_ROLE_ARN;
 export const MEMBER_ACCOUNT_ROLE_NAME =
     process.env.MEMBER_ACCOUNT_ROLE_NAME ?? "OrganizationAccountAccessRole";
 export const MANAGEMENT_ACCOUNT_ROLE_NAME =
@@ -266,6 +265,15 @@ export async function buildAwsClients(): Promise<void> {
     const callerIdentity = await loginSts.send(new GetCallerIdentityCommand({}));
     console.log("[caller-identity]", JSON.stringify(callerIdentity));
     _pulumiIacRoleArn = toIamRoleArnFromCallerIdentity(callerIdentity);
+
+    if (!ORG_ASSUME_ROLE_ARN) {
+        throw new Error(
+            "ORG_ASSUME_ROLE_ARN environment variable is not set. It must be the ARN of " +
+            "an AWS Organizations management-account role that this program's caller " +
+            "identity can assume; it is required for account listing, duplicate " +
+            "detection, and trust-policy bootstrap.",
+        );
+    }
 
     const baseCreds = await loginSts.send(
         new AssumeRoleCommand({
