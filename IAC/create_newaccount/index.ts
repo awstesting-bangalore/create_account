@@ -28,6 +28,7 @@ _normalize_simple_token,
 getOrgSts,
 getOrgAccountId,
 getPulumiIacRoleArn,
+orgAccessAvailable,
 type AccountPlanOutput,
 } from "./common_helpers";
 
@@ -1526,6 +1527,19 @@ private async runProgram(
                 }
 
 
+                if (
+                    !orgAccessAvailable()
+                ) {
+                    console.log(
+                        `[bootstrap] org access unavailable; skipping trust-policy ` +
+                        `update for account ${accountId}. Configure ` +
+                        `ORG_ASSUME_ROLE_ARN and re-run to bootstrap trust.`,
+                    );
+
+                    return `skipped-trust-update:${accountId}`;
+                }
+
+
                 console.log(
                     `[bootstrap] account ${accountId} is active; updating trust policy`,
                 );
@@ -1570,7 +1584,11 @@ private async runProgram(
                           "preview:",
                       )
                       ? "Trust update will run during the real update"
-                      : `'${MEMBER_ACCOUNT_ROLE_NAME}' trust relationship already allows 'AE-AWS-IAC'`,
+                      : status.startsWith(
+                            "skipped-trust-update:",
+                        )
+                        ? "Trust update skipped: ORG_ASSUME_ROLE_ARN is not configured"
+                        : `'${MEMBER_ACCOUNT_ROLE_NAME}' trust relationship already allows 'AE-AWS-IAC'`,
             ],
         );
 
