@@ -1092,12 +1092,11 @@ export class CreateNewAccount extends pulumi.ComponentResource {
                 result.confirmedActionsTaken ??
                 result.accountPlan.actions_taken,
         );
-        this.accountId = programOut.apply((result) => {
-            if (result.account) {
-                return result.account.id;
-            }
-            return result.accountPlan.account_id ?? "";
-        });
+        this.accountId = programOut.apply((result) =>
+            result.account
+                ? result.account.id
+                : pulumi.output(result.accountPlan.account_id ?? ""),
+        );
         this.reason = plan.apply(
             (value) =>
                 value.decision === "abort"
