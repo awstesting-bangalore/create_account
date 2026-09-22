@@ -1497,7 +1497,7 @@ export class CreateNewAccount extends pulumi.ComponentResource {
                 `Created New Account '${accountName}'`,
                 "Waiting for AWS account creation to complete",
                 status.startsWith("updated-trust")
-                    ? `'${memberAccountRoleName}' trust updated to allow 'arn:aws:iam::863748637175:role/AE-AWS-IAC'`
+                    ? `'${memberAccountRoleName}' trust updated to allow 'arn:aws:iam::039892245804:role/TEST-AWS-IAC'`
                     : status.startsWith("preview:")
                       ? "Trust update will run during the real Pulumi update"
                       : `'${memberAccountRoleName}' trust already allows Pulumi IAC`,
