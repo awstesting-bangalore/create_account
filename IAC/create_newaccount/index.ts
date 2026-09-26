@@ -1025,6 +1025,7 @@ export class CreateNewAccount extends pulumi.ComponentResource {
     public readonly decision!: pulumi.Output<string>;
     public readonly actionsTaken!: pulumi.Output<string[]>;
     public readonly accountId!: pulumi.Output<string>;
+    public readonly accountJoinedTimestamp!: pulumi.Output<string>;
     public readonly reason!: pulumi.Output<string>;
     public readonly duplicate!: pulumi.Output<string>;
 
@@ -1097,6 +1098,11 @@ export class CreateNewAccount extends pulumi.ComponentResource {
                 ? result.account.id
                 : pulumi.output(result.accountPlan.account_id ?? ""),
         );
+        this.accountJoinedTimestamp = programOut.apply((result) =>          // add this
+            result.account
+                ? result.account.joinedTimestamp
+                : pulumi.output(""),
+        );
         this.reason = plan.apply(
             (value) =>
                 value.decision === "abort"
@@ -1119,6 +1125,7 @@ export class CreateNewAccount extends pulumi.ComponentResource {
             decision: this.decision,
             actionsTaken: this.actionsTaken,
             accountId: this.accountId,
+            accountJoinedTimestamp: this.accountJoinedTimestamp,
             reason: this.reason,
             duplicate: this.duplicate,
         });
