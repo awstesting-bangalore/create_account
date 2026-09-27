@@ -1098,11 +1098,20 @@ export class CreateNewAccount extends pulumi.ComponentResource {
                 ? result.account.id
                 : pulumi.output(result.accountPlan.account_id ?? ""),
         );
-        this.accountJoinedTimestamp = programOut.apply((result) =>          // add this
-            result.account
-                ? result.account.joinedTimestamp
-                : pulumi.output(""),
-        );
+        this.accountJoinedTimestamp = programOut.apply((result) => {
+            if (!result.account) {
+                return pulumi.output("");
+            }
+            return result.account.joinedTimestamp.apply((ts) => {
+                if (!ts) {
+                    return "";
+                }
+                const d = new Date(ts);
+                const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+                const dd = String(d.getUTCDate()).padStart(2, "0");
+                return `${mm}/${dd}/${d.getUTCFullYear()}`;
+            });
+        });
         this.reason = plan.apply(
             (value) =>
                 value.decision === "abort"
